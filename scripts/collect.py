@@ -89,8 +89,9 @@ def setup(workspace,args):
 
 
 def main(argv=None):
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--workspace',default=str(Path.home()/'.collect-douyin'));p.add_argument('command',help='capabilities, bootstrap, setup, configure, login, organize, status, videos, export-word, or another collection command');p.add_argument('arguments',nargs=argparse.REMAINDER);a=p.parse_args(argv)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--workspace',default=str(Path.home()/'.collect-douyin'));p.add_argument('command',help='overview, capabilities, bootstrap, setup, configure, login, organize, status, videos, export-word, or another collection command');p.add_argument('arguments',nargs=argparse.REMAINDER);a=p.parse_args(argv)
     workspace=Path(a.workspace).expanduser().resolve()
+    if a.command=='overview':return {'message':(ROOT/'references/overview.md').read_text(encoding='utf-8-sig'),'required':['profile'],'defaults':{'minimum_likes':500,'comparison':'>=','date_range':'all_history_with_coverage_report','existing_document':None,'format':'template_defaults','reference':None,'output_dir':'exports','schedule_enabled':False}}
     if a.command=='capabilities':return capabilities()
     if a.command=='bootstrap':return bootstrap(a.arguments)
     workspace.mkdir(parents=True,exist_ok=True)

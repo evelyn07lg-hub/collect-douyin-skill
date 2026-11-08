@@ -1,6 +1,6 @@
 interface:
   display_name: "Collect · 抖音文稿整理"
   short_description: "对话式整理抖音作品，按点赞筛选，结合字幕与口播校对并生成自定义文稿"
-  default_prompt: "用 $collect-douyin-skill 按我提供的抖音账号和点赞门槛整理文稿。"
+  default_prompt: "用 $collect-douyin-skill 开始整理文稿，先给我首次使用总览；已提供的条件不必重复询问。"
 policy:
   allow_implicit_invocation: true
