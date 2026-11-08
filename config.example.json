@@ -1,0 +1,74 @@
+{
+  "mode": "browser",
+  "data_dir": "data",
+  "interval_minutes": 2880,
+  "model": "models/faster-whisper-small",
+  "accounts": [],
+  "public_profiles": [],
+  "wps": {
+    "url": "",
+    "enabled": false,
+    "minimum_loaded_pages": 1,
+    "preserve_existing_content_and_format": true,
+    "append_by_account_section": true,
+    "update_existing_entries": false,
+    "append_new_entries_only": true,
+    "title": "",
+    "require_account_page_breaks": true
+  },
+  "browser_budgets": {
+    "max_scrolls": 4,
+    "max_details": 30
+  },
+  "media_sources": {
+    "authorized_player_download": true,
+    "browser_capture_when_needed": true,
+    "browser_buffer_only": true
+  },
+  "schedule": {
+    "every_days": 2,
+    "time": "09:00",
+    "timezone": "Asia/Shanghai",
+    "enabled": false,
+    "state": "setup_required"
+  },
+  "caption_only_work_ids": [],
+  "proofreading": {
+    "enabled": true,
+    "reference_url": "",
+    "reference_title": "",
+    "reference_path": "",
+    "punctuation_model": "models/ct-punc",
+    "reviewed_replacements": [],
+    "asr_vocabulary": [],
+    "english_ending": "",
+    "ending_aliases": [],
+    "video_subtitles": {
+      "enabled": true,
+      "sample_fps": 2,
+      "roi": [
+        0,
+        0.5,
+        1,
+        0.9
+      ],
+      "min_ocr_confidence": 0.8,
+      "minimum_coverage": 0.75,
+      "refine_variants": true,
+      "reviewed_ocr_corrections": [],
+      "browser_sample_fps": 2
+    },
+    "caption_policy": "prefer"
+  },
+  "minimum_likes": 500,
+  "word_export": {
+    "enabled": true,
+    "output_dir": "exports",
+    "title": "口播文稿整理"
+  },
+  "browser": "chromium",
+  "collection": {
+    "include_homepage_coauthored": true,
+    "image_mode": "published_copy"
+  }
+}
