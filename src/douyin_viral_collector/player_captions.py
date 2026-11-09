@@ -46,8 +46,9 @@ def capture_player_subtitles(page,work,root,settings,progress=None):
         cached=json.loads(checkpoint.read_text(encoding='utf-8'))
         if cached.get('layout_filter_version')==2 and str(cached.get('work_id'))==str(work['id']) and cached.get('account_id')==work['account_id'] and abs(cached.get('duration',0)-duration)<.25 and cached.get('sample_fps')==fps and cached.get('roi')==roi:
             previous=cached.get('raw_records',[])
-    begin=max(0,len(previous)-2) if len(previous)<count else 0
+    begin=max(0,min(len(previous),count)-2)
     records=previous[:begin];resumed_frames=begin;seam_matches=0
+    if progress and begin:progress({"frames":begin,"total":count,"seconds":round(begin/fps,1)})
     for i in range(begin,count):
         if time.monotonic()-started>settings.get('max_browser_wall_seconds',1800):raise ValueError('Browser caption capture incomplete; time budget exceeded')
         if i%20==0 and urlsplit(page.url).path.rstrip('/')!=expected:raise ValueError('Player navigated to another work')
@@ -92,7 +93,7 @@ def capture_player_subtitles(page,work,root,settings,progress=None):
         if evidence_key and evidence_key not in evidence_keys and len(evidence_keys)<400:
             frame=evidence_dir/(str(i).zfill(5)+'_'+str(round(target*1000))+'.jpg');encoded_ok,encoded=cv2.imencode('.jpg',crop,[cv2.IMWRITE_JPEG_QUALITY,95]);assert encoded_ok,'Evidence frame encoding failed';frame.write_bytes(encoded.tobytes());record['evidence_frame']=str(frame);evidence_keys.add(evidence_key)
         records.append(record)
-        if (i+1)%100==0:
+        if (i+1)%20==0 or i+1==count:
             checkpoint=evidence_dir/'capture.partial.json';temporary=checkpoint.with_suffix('.tmp');temporary.write_text(json.dumps({'work_id':work['id'],'account_id':work['account_id'],'duration':duration,'sample_fps':fps,'roi':roi,'capture_complete':False,'layout_filter_version':2,'raw_records':records},ensure_ascii=False),encoding='utf-8');temporary.replace(checkpoint)
         if progress and (i+1)%20==0:progress({'frames':i+1,'total':count,'seconds':round(target,1)})
     from collections import defaultdict

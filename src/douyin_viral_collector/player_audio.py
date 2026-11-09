@@ -3,15 +3,39 @@ import base64,json,hashlib
 from pathlib import Path
 from urllib.parse import urlsplit
 
+def reusable_recording(work,root):
+ import av
+ expected=Path(root)/'player-recordings'/(hashlib.sha256((work['account_id']+str(work['id'])).encode()).hexdigest()+'.webm')
+ meta=expected.with_suffix('.json')
+ if not expected.is_file() or not meta.is_file():return None
+ try:
+  data=json.loads(meta.read_text(encoding='utf-8'))
+  duration=float(data['duration'])
+  if data.get('account_id')!=work['account_id'] or str(data.get('work_id'))!=str(work['id']) or not data.get('complete') or data.get('source')!='verified_visible_player_audio_recording':return None
+  if urlsplit(data.get('url','')).path.rstrip('/')!='/video/'+str(work['id']) or data.get('elapsed',0)<duration*.97:return None
+  with av.open(str(expected)) as container:
+   if not container.streams.audio:return None
+   actual=container.duration/av.time_base
+   if abs(actual-duration)>max(2,duration*.01):return None
+   container.seek(int(max(0,duration-3)*av.time_base))
+   if not list(container.decode(audio=0)):return None
+  return dict(data,path=str(expected),reused_verified_recording=True)
+ except (OSError,ValueError,KeyError,TypeError):return None
+
 def record_visible_audio(page,work,root):
  import av
+ cached=reusable_recording(work,root)
+ if cached:return cached
  expected='/video/'+str(work['id']);assert work.get('detail_verified') and urlsplit(page.url).path.rstrip('/')==expected
  videos=page.locator('video:visible');candidates=[]
  for i in range(videos.count()):
   v=videos.nth(i);b=v.bounding_box()
   if b and b['width']>=150 and b['height']>=200:candidates.append(v)
  if len(candidates)!=1:raise ValueError('Active video is ambiguous')
- v=candidates[0];duration=v.evaluate('(v)=>v.duration');assert duration and 1<duration<=600,'Recording duration out of budget'
+ v=candidates[0];duration=v.evaluate('(v)=>v.duration');
+ from .progress import progress
+ progress(f'正在读取音轨：视频约{round(duration)}秒；完整缓存可复用')
+ assert duration and 1<duration<=600,'Recording duration out of budget'
  result=v.evaluate('''async(v,expected)=>{
   if(location.pathname.replace(/\\/$/,'')!==expected)throw new Error('Work changed');
   if(typeof v.captureStream!=='function')throw new Error('Player does not allow ordinary audio capture');
